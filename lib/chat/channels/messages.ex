@@ -2,7 +2,7 @@ defmodule Chat.Channels.Messages do
   use Phoenix.Channel
 
   def join(socket, message) do
-    IO.puts "JOIN"
+    IO.puts "JOIN #{socket.channel}:#{socket.topic}"
     reply socket, "join", status: "connected"
     broadcast socket, "user:entered", username: "anonymous"
     {:ok, socket}

@@ -14,9 +14,10 @@
 
         socket.join("messages", "global", {}, function(chan){
 
-          $input.on("keypress", function(e) {
+          $input.off("keypress").on("keypress", function(e) {
             if (e.keyCode == 13) {
               chan.send("new", {body: $input.val()});
+              $input.val("");
             }
           });
 
@@ -25,11 +26,11 @@
           });
 
           chan.on("new", function(message){
-            $messages.append("<br/>" + message.body)
+            $messages.append("<br/>" + message.body);
           });
 
           chan.on("user:entered", function(msg){
-            $messages.append("<br/><i>[" + msg.username + " entered] " + msg.body + "</i>")
+            $messages.append("<br/><i>[" + msg.username + " entered]</i>");
           });
         });
       });
@@ -40,9 +41,9 @@
 
     <h3>Status: <small id="status">Not Connected</small></h3>
 
-    <div id="messages">
-    </div>
+    <div id="messages"></div>
     <input id="message-input" type="text">
     <br/>
   </body>
 </html>
+
