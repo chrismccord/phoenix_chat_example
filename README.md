@@ -12,12 +12,12 @@ Now you can visit `localhost:4000` from your browser.
 
 #### JavaScript
 ```javascript
-var socket     = new Phoenix.Socket("ws://localhost:4000/ws");
+var socket     = new Phoenix.Socket("ws://" + location.host +  "/ws");
 var $status    = $("#status");
 var $messages  = $("#messages");
 var $input     = $("#message-input");
 
-socket.join("messages", "global", {}, function(chan){
+socket.join("rooms", "lobby", {}, function(chan){
 
   $input.off("keypress").on("keypress", function(e) {
     if (e.keyCode == 13) {
@@ -30,7 +30,7 @@ socket.join("messages", "global", {}, function(chan){
     $status.text("joined");
   });
 
-  chan.on("new", function(message){
+  chan.on("new:message", function(message){
     $messages.append("<br/>" + message.body);
   });
 
@@ -38,7 +38,7 @@ socket.join("messages", "global", {}, function(chan){
     $messages.append("<br/><i>[" + msg.username + " entered]</i>");
   });
 });
-```
+ ```
 
 #### Router
 ```elixir
@@ -49,13 +49,13 @@ defmodule Chat.Router do
   plug Plug.Static, at: "/static", from: :chat
   get "/", Chat.Controllers.Pages, :index, as: :page
 
-  channel "messages", Chat.Channels.Messages
+  channel "rooms", Chat.Channels.Rooms
 end
 ```
 
 #### Channel
 ```elixir
-defmodule Chat.Channels.Messages do
+defmodule Chat.Channels.Rooms do
   use Phoenix.Channel
 
   def join(socket, message) do
@@ -66,8 +66,11 @@ defmodule Chat.Channels.Messages do
   end
 
   def event("new", socket, message) do
-    broadcast socket, "new", message
+    broadcast socket, "new:message", message
     {:ok, socket}
   end
 end
+
+
+
 ```
