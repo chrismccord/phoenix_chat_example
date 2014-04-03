@@ -5,5 +5,5 @@ defmodule Chat.Router do
   plug Plug.Static, at: "/static", from: :chat
   get "/", Chat.Controllers.Pages, :index, as: :page
 
-  channel "messages", Chat.Channels.Messages
+  channel "rooms", Chat.Channels.Rooms
 end

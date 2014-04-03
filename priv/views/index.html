@@ -12,7 +12,7 @@
         var $messages  = $("#messages");
         var $input     = $("#message-input");
 
-        socket.join("messages", "global", {}, function(chan){
+        socket.join("rooms", "lobby", {}, function(chan){
 
           $input.off("keypress").on("keypress", function(e) {
             if (e.keyCode == 13) {
@@ -25,7 +25,7 @@
             $status.text("joined");
           });
 
-          chan.on("new", function(message){
+          chan.on("new:message", function(message){
             $messages.append("<br/>" + message.body);
           });
 
