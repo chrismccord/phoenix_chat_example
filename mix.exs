@@ -20,7 +20,7 @@ defmodule Chat.Mixfile do
   # { :barbat, "~> 0.1", github: "elixir-lang/barbat" }
   defp deps do
     [
-      {:phoenix, github: "phoenixframework/phoenix", ref: "0de0576026cc6987b8c44662fb0cddf13d9afe85"}
+      {:phoenix, github: "phoenixframework/phoenix", branch: "cm-channels"}
     ]
   end
 end

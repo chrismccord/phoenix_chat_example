@@ -67,6 +67,14 @@
       });
     };
 
+    Channel.prototype.leave = function(message) {
+      if (message == null) {
+        message = {};
+      }
+      this.socket.leave(this.channel, this.topic, message);
+      return this.reset();
+    };
+
     return Channel;
 
   })();
@@ -86,7 +94,7 @@
 
     Socket.prototype.reconnectTimer = null;
 
-    Socket.prototype.reconnectAfterMs = 1000;
+    Socket.prototype.reconnectAfterMs = 5000;
 
     function Socket(endPoint) {
       this.endPoint = endPoint;
@@ -96,28 +104,35 @@
       this.reconnect();
     }
 
+    Socket.prototype.close = function(callback) {
+      if (this.conn != null) {
+        this.conn.onclose = (function(_this) {
+          return function() {};
+        })(this);
+        this.conn.close();
+        this.conn = null;
+      }
+      return typeof callback === "function" ? callback() : void 0;
+    };
+
     Socket.prototype.reconnect = function() {
-      this.conn = new WebSocket(this.endPoint);
-      this.conn.onopen = (function(_this) {
+      return this.close((function(_this) {
         return function() {
-          return _this.onOpen();
+          _this.conn = new WebSocket(_this.endPoint);
+          _this.conn.onopen = function() {
+            return _this.onOpen();
+          };
+          _this.conn.onerror = function(error) {
+            return _this.onError(error);
+          };
+          _this.conn.onmessage = function(event) {
+            return _this.onMessage(event);
+          };
+          return _this.conn.onclose = function(event) {
+            return _this.onClose(event);
+          };
         };
-      })(this);
-      this.conn.onerror = (function(_this) {
-        return function(error) {
-          return _this.onError(error);
-        };
-      })(this);
-      this.conn.onmessage = (function(_this) {
-        return function(event) {
-          return _this.onMessage(event);
-        };
-      })(this);
-      return this.conn.onclose = (function(_this) {
-        return function(event) {
-          return _this.onClose(event);
-        };
-      })(this);
+      })(this));
     };
 
     Socket.prototype.resetBufferTimer = function() {
@@ -130,14 +145,16 @@
     };
 
     Socket.prototype.onOpen = function() {
-      clearTimeout(this.reconnectTimer);
+      clearInterval(this.reconnectTimer);
       return this.rejoinAll();
     };
 
     Socket.prototype.onClose = function(event) {
-      console.log("WS: " + event);
-      clearTimeout(this.reconnectTimer);
-      return this.reconnectTimer = setTimeout(((function(_this) {
+      if (typeof console.log === "function") {
+        console.log("WS close: " + event);
+      }
+      clearInterval(this.reconnectTimer);
+      return this.reconnectTimer = setInterval(((function(_this) {
         return function() {
           return _this.reconnect();
         };
@@ -145,11 +162,12 @@
     };
 
     Socket.prototype.onError = function(error) {
-      return typeof console.log === "function" ? console.log("WS: " + error) : void 0;
+      return typeof console.log === "function" ? console.log("WS error: " + error) : void 0;
     };
 
     Socket.prototype.connectionState = function() {
-      switch (this.conn.readyState) {
+      var _ref, _ref1;
+      switch ((_ref = (_ref1 = this.conn) != null ? _ref1.readyState : void 0) != null ? _ref : 3) {
         case 0:
           return "connecting";
         case 1:
@@ -198,8 +216,17 @@
       }
     };
 
-    Socket.prototype.unjoin = function(channel, topic) {
+    Socket.prototype.leave = function(channel, topic, message) {
       var c;
+      if (message == null) {
+        message = {};
+      }
+      this.send({
+        channel: channel,
+        topic: topic,
+        "leave": "leave",
+        message: message
+      });
       return this.channels = (function() {
         var _i, _len, _ref, _results;
         _ref = this.channels;
@@ -243,7 +270,9 @@
 
     Socket.prototype.onMessage = function(rawMessage) {
       var chan, channel, event, message, topic, _i, _len, _ref, _ref1, _results;
-      console.log(rawMessage);
+      if (typeof console.log === "function") {
+        console.log(rawMessage);
+      }
       _ref = JSON.parse(rawMessage.data), channel = _ref.channel, topic = _ref.topic, event = _ref.event, message = _ref.message;
       _ref1 = this.channels;
       _results = [];
