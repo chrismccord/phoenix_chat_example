@@ -12,30 +12,42 @@ Now you can visit `localhost:4000` from your browser.
 
 #### JavaScript
 ```javascript
-var socket     = new Phoenix.Socket("ws://" + location.host +  "/ws");
-var $status    = $("#status");
-var $messages  = $("#messages");
-var $input     = $("#message-input");
+$(function(){
+  var socket     = new Phoenix.Socket("ws://" + location.host +  "/ws");
+  var $status    = $("#status");
+  var $messages  = $("#messages");
+  var $input     = $("#message-input");
+  var $username  = $("#username");
+  var sanitize   = function(html){ return $("<div/>").text(html).html(); }
 
-socket.join("rooms", "lobby", {}, function(chan){
+  var messageTemplate = function(message){
+    var username = sanitize(message.username || "anonymous");
+    var body     = sanitize(message.body);
+    return("<p><a href='#'>[" + username + "]</a>&nbsp; " + body +"</p>");
+  }
 
-  $input.off("keypress").on("keypress", function(e) {
-    if (e.keyCode == 13) {
-      chan.send("new", {body: $input.val()});
-      $input.val("");
-    }
-  });
+  socket.join("rooms", "lobby", {}, function(chan){
 
-  chan.on("join", function(message){
-    $status.text("joined");
-  });
+    $input.off("keypress").on("keypress", function(e) {
+      if (e.keyCode == 13) {
+        chan.send("new:message", {username: $username.val(), body: $input.val()});
+        $input.val("");
+      }
+    });
 
-  chan.on("new:message", function(message){
-    $messages.append("<br/>" + message.body);
-  });
+    chan.on("join", function(message){
+      $status.text("joined");
+    });
 
-  chan.on("user:entered", function(msg){
-    $messages.append("<br/><i>[" + msg.username + " entered]</i>");
+    chan.on("new:message", function(message){
+      $messages.append(messageTemplate(message));
+      scrollTo(0, document.body.scrollHeight);
+    });
+
+    chan.on("user:entered", function(msg){
+      var username = sanitize(msg.username || "anonymous");
+      $messages.append("<br/><i>[" + username + " entered]</i>");
+    });
   });
 });
  ```
@@ -61,16 +73,13 @@ defmodule Chat.Channels.Rooms do
   def join(socket, message) do
     IO.puts "JOIN #{socket.channel}:#{socket.topic}"
     reply socket, "join", status: "connected"
-    broadcast socket, "user:entered", username: "anonymous"
+    broadcast socket, "user:entered", username: message["username"]
     {:ok, socket}
   end
 
-  def event("new", socket, message) do
+  def event("new:message", socket, message) do
     broadcast socket, "new:message", message
     {:ok, socket}
   end
 end
-
-
-
 ```
