@@ -14,11 +14,11 @@ defmodule Chat.Channels.Rooms do
   def join(socket, message) do
     IO.puts "JOIN #{socket.channel}:#{socket.topic}"
     reply socket, "join", status: "connected"
-    broadcast socket, "user:entered", username: "anonymous"
+    broadcast socket, "user:entered", username: message["username"]
     {:ok, socket}
   end
 
-  def event("new", socket, message) do
+  def event("new:message", socket, message) do
     broadcast socket, "new:message", message
     {:ok, socket}
   end
