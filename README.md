@@ -1,4 +1,5 @@
-# Simple Chat with the [Phoenix Framework](https://github.com/phoenixframework/phoenix)
+# Simple Chat Example
+> Built with the [Phoenix Framework](https://github.com/phoenixframework/phoenix)
 
 To start your new Phoenix application you have to:
 
