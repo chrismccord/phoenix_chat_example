@@ -20,7 +20,7 @@ defmodule Chat.Channels.Rooms do
 
   def event("new:message", socket, message) do
     broadcast socket, "new:message", message
-    {:ok, socket}
+    socket
   end
 end
 
