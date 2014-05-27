@@ -11,14 +11,18 @@ defmodule Chat.Channels.Rooms do
   {:error, socket, reason} to deny subscription/broadcast on this channel
   for the requested topic
   """
-  def join(socket, message) do
+  def join(socket, "lobby", message) do
     IO.puts "JOIN #{socket.channel}:#{socket.topic}"
     reply socket, "join", status: "connected"
     broadcast socket, "user:entered", username: message["username"]
     {:ok, socket}
   end
 
-  def event("new:message", socket, message) do
+  def join(socket, _private_topic, _message) do
+    {:error, socket, :unauthorized}
+  end
+
+  def event(socket, "new:message", message) do
     broadcast socket, "new:message", message
     socket
   end
