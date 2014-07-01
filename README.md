@@ -74,10 +74,10 @@ end
 defmodule Chat.Channels.Rooms do
   use Phoenix.Channel
 
-  def join(socket, message) do
-    IO.puts "JOIN #{socket.channel}:#{socket.topic}"
+  def join(socket, topic, %{"username" => username}) do
+    IO.puts "JOIN #{socket.channel}:#{topic}"
     reply socket, "join", status: "connected"
-    broadcast socket, "user:entered", username: message["username"]
+    broadcast socket, "user:entered", %{username: username}
     {:ok, socket}
   end
 
