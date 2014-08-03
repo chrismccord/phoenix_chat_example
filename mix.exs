@@ -4,7 +4,8 @@ defmodule Chat.Mixfile do
   def project do
     [ app: :chat,
       version: "0.0.1",
-      elixir: "~> 0.14.3",
+      elixir: "~> 0.15.0",
+      elixirc_paths: ["lib", "web"],
       deps: deps ]
   end
 
@@ -22,8 +23,8 @@ defmodule Chat.Mixfile do
   # { :barbat, "~> 0.1", github: "elixir-lang/barbat" }
   defp deps do
     [
-      {:phoenix, "0.3.1"},
-      {:cowboy, github: "extend/cowboy", override: true, ref: "05024529679d1d0203b8dcd6e2932cc2a526d370"},
+      {:phoenix, github: "phoenixframework/phoenix"},
+      {:cowboy, "~> 1.0.0", github: "extend/cowboy", override: true}
     ]
   end
 end

@@ -1,4 +1,4 @@
-defmodule Chat.Controllers.Pages do
+defmodule Chat.PageController do
   use Phoenix.Controller
 
   def index(conn, _params) do

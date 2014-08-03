@@ -1,4 +1,4 @@
-defmodule Chat.Channels.Rooms do
+defmodule Chat.RoomChannel do
   use Phoenix.Channel
 
   @doc """
@@ -14,7 +14,7 @@ defmodule Chat.Channels.Rooms do
   def join(socket, "lobby", message) do
     IO.puts "JOIN #{socket.channel}:#{socket.topic}"
     reply socket, "join", %{status: "connected"}
-    broadcast socket, "user:entered", %{username: message["username"]}
+    broadcast socket, "user:entered", %{user: message["user"]}
     {:ok, socket}
   end
 
@@ -22,11 +22,9 @@ defmodule Chat.Channels.Rooms do
     {:error, socket, :unauthorized}
   end
 
-  def event(socket, "new:message", message) do
-    broadcast socket, "new:message", message
+  def event(socket, "new:msg", message) do
+    broadcast socket, "new:msg", message
     socket
   end
 end
-
-
 
