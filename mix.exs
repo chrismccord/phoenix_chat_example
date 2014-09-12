@@ -4,16 +4,17 @@ defmodule Chat.Mixfile do
   def project do
     [ app: :chat,
       version: "0.0.1",
-      elixir: "~> 0.15.0",
+      elixir: "~> 1.0.0",
       elixirc_paths: ["lib", "web"],
       deps: deps ]
   end
 
   # Configuration for the OTP application
   def application do
-    [mod: { Chat, [] },
-     applications: [:phoenix]
-     ]
+    [
+      mod: { Chat, [] },
+      applications: [:phoenix, :cowboy, :logger]
+    ]
   end
 
   # Returns the list of dependencies in the format:
@@ -23,8 +24,8 @@ defmodule Chat.Mixfile do
   # { :barbat, "~> 0.1", github: "elixir-lang/barbat" }
   defp deps do
     [
-      {:phoenix, github: "phoenixframework/phoenix"},
-      {:cowboy, "~> 1.0.0", github: "extend/cowboy", override: true}
+      {:phoenix, "~> 0.4.1"},
+      {:cowboy, "~> 1.0.0"}
     ]
   end
 end
