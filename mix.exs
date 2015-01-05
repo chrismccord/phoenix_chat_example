@@ -2,30 +2,27 @@ defmodule Chat.Mixfile do
   use Mix.Project
 
   def project do
-    [ app: :chat,
-      version: "0.0.1",
-      elixir: "~> 1.0.0",
-      elixirc_paths: ["lib", "web"],
-      deps: deps ]
+    [app: :chat,
+     version: "0.0.1",
+     elixir: "~> 1.0",
+     elixirc_paths: ["lib", "web"],
+     compilers: [:phoenix] ++ Mix.compilers,
+     deps: deps]
   end
 
   # Configuration for the OTP application
+  #
+  # Type `mix help compile.app` for more information
   def application do
-    [
-      mod: { Chat, [] },
-      applications: [:phoenix, :cowboy, :logger]
-    ]
+    [mod: {Chat, []},
+     applications: [:phoenix, :cowboy, :logger]]
   end
 
-  # Returns the list of dependencies in the format:
-  # { :foobar, git: "https://github.com/elixir-lang/foobar.git", tag: "0.1" }
+  # Specifies your project dependencies
   #
-  # To specify particular versions, regardless of the tag, do:
-  # { :barbat, "~> 0.1", github: "elixir-lang/barbat" }
+  # Type `mix help deps` for examples and options
   defp deps do
-    [
-      {:phoenix, "~> 0.4.1"},
-      {:cowboy, "~> 1.0.0"}
-    ]
+    [{:phoenix, "~> 0.7.2"},
+     {:cowboy, "~> 1.0"}]
   end
 end

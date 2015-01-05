@@ -9,6 +9,8 @@
       return factory((root.Phoenix = {}));
     }
   })(this, function(exports) {
+    var root;
+    root = this;
     exports.Channel = (function() {
       Channel.prototype.bindings = null;
 
@@ -86,26 +88,35 @@
 
     })();
     exports.Socket = (function() {
-      Socket.prototype.conn = null;
+      Socket.states = {
+        connecting: 0,
+        open: 1,
+        closing: 2,
+        closed: 3
+      };
 
-      Socket.prototype.endPoint = null;
+      Socket.prototype.heartbeatIntervalMs = 30000;
 
-      Socket.prototype.channels = null;
+      Socket.prototype.stateChangeCallbacks = null;
 
-      Socket.prototype.sendBuffer = null;
+      Socket.prototype.transport = null;
 
-      Socket.prototype.sendBufferTimer = null;
-
-      Socket.prototype.flushEveryMs = 50;
-
-      Socket.prototype.reconnectTimer = null;
-
-      Socket.prototype.reconnectAfterMs = 5000;
-
-      function Socket(endPoint) {
+      function Socket(endPoint, opts) {
+        var _ref, _ref1, _ref2;
+        if (opts == null) {
+          opts = {};
+        }
+        this.states = exports.Socket.states;
+        this.transport = (_ref = (_ref1 = opts.transport) != null ? _ref1 : root.WebSocket) != null ? _ref : exports.LongPoller;
+        this.heartbeatIntervalMs = (_ref2 = opts.heartbeatIntervalMs) != null ? _ref2 : this.heartbeatIntervalMs;
         this.endPoint = this.expandEndpoint(endPoint);
         this.channels = [];
         this.sendBuffer = [];
+        this.stateChangeCallbacks = {
+          open: [],
+          close: [],
+          error: []
+        };
         this.resetBufferTimer();
         this.reconnect();
       }
@@ -128,12 +139,16 @@
         return "" + (this.protocol()) + "://" + location.host + endPoint;
       };
 
-      Socket.prototype.close = function(callback) {
+      Socket.prototype.close = function(callback, code, reason) {
         if (this.conn != null) {
           this.conn.onclose = (function(_this) {
             return function() {};
           })(this);
-          this.conn.close();
+          if (code != null) {
+            this.conn.close(code, reason != null ? reason : "");
+          } else {
+            this.conn.close();
+          }
           this.conn = null;
         }
         return typeof callback === "function" ? callback() : void 0;
@@ -142,18 +157,18 @@
       Socket.prototype.reconnect = function() {
         return this.close((function(_this) {
           return function() {
-            _this.conn = new WebSocket(_this.endPoint);
+            _this.conn = new _this.transport(_this.endPoint);
             _this.conn.onopen = function() {
-              return _this.onOpen();
+              return _this.onConnOpen();
             };
             _this.conn.onerror = function(error) {
-              return _this.onError(error);
+              return _this.onConnError(error);
             };
             _this.conn.onmessage = function(event) {
               return _this.onMessage(event);
             };
             return _this.conn.onclose = function(event) {
-              return _this.onClose(event);
+              return _this.onConnClose(event);
             };
           };
         })(this));
@@ -168,37 +183,90 @@
         })(this)), this.flushEveryMs);
       };
 
-      Socket.prototype.onOpen = function() {
-        clearInterval(this.reconnectTimer);
-        return this.rejoinAll();
+      Socket.prototype.onOpen = function(callback) {
+        if (callback) {
+          return this.stateChangeCallbacks.open.push(callback);
+        }
       };
 
-      Socket.prototype.onClose = function(event) {
+      Socket.prototype.onClose = function(callback) {
+        if (callback) {
+          return this.stateChangeCallbacks.close.push(callback);
+        }
+      };
+
+      Socket.prototype.onError = function(callback) {
+        if (callback) {
+          return this.stateChangeCallbacks.error.push(callback);
+        }
+      };
+
+      Socket.prototype.onConnOpen = function() {
+        var callback, _i, _len, _ref, _results;
+        clearInterval(this.reconnectTimer);
+        if (!this.transport.skipHeartbeat) {
+          this.heartbeatTimer = setInterval(((function(_this) {
+            return function() {
+              return _this.sendHeartbeat();
+            };
+          })(this)), this.heartbeatIntervalMs);
+        }
+        this.rejoinAll();
+        _ref = this.stateChangeCallbacks.open;
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          callback = _ref[_i];
+          _results.push(callback());
+        }
+        return _results;
+      };
+
+      Socket.prototype.onConnClose = function(event) {
+        var callback, _i, _len, _ref, _results;
         if (typeof console.log === "function") {
           console.log("WS close: ", event);
         }
         clearInterval(this.reconnectTimer);
-        return this.reconnectTimer = setInterval(((function(_this) {
+        clearInterval(this.heartbeatTimer);
+        this.reconnectTimer = setInterval(((function(_this) {
           return function() {
             return _this.reconnect();
           };
         })(this)), this.reconnectAfterMs);
+        _ref = this.stateChangeCallbacks.close;
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          callback = _ref[_i];
+          _results.push(callback(event));
+        }
+        return _results;
       };
 
-      Socket.prototype.onError = function(error) {
-        return typeof console.log === "function" ? console.log("WS error: ", error) : void 0;
+      Socket.prototype.onConnError = function(error) {
+        var callback, _i, _len, _ref, _results;
+        if (typeof console.log === "function") {
+          console.log("WS error: ", error);
+        }
+        _ref = this.stateChangeCallbacks.error;
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          callback = _ref[_i];
+          _results.push(callback(error));
+        }
+        return _results;
       };
 
       Socket.prototype.connectionState = function() {
-        var _ref, _ref1;
-        switch ((_ref = (_ref1 = this.conn) != null ? _ref1.readyState : void 0) != null ? _ref : 3) {
-          case 0:
+        var _ref;
+        switch ((_ref = this.conn) != null ? _ref.readyState : void 0) {
+          case this.states.connecting:
             return "connecting";
-          case 1:
+          case this.states.open:
             return "open";
-          case 2:
+          case this.states.closing:
             return "closing";
-          case 3:
+          case this.states.closed:
+          case null:
             return "closed";
         }
       };
@@ -233,7 +301,7 @@
 
       Socket.prototype.join = function(channel, topic, message, callback) {
         var chan;
-        chan = new Phoenix.Channel(channel, topic, message, callback, this);
+        chan = new exports.Channel(channel, topic, message, callback, this);
         this.channels.push(chan);
         if (this.isConnected()) {
           return this.rejoin(chan);
@@ -279,6 +347,15 @@
         }
       };
 
+      Socket.prototype.sendHeartbeat = function() {
+        return this.send({
+          channel: "phoenix",
+          topic: "conn",
+          event: "heartbeat",
+          message: {}
+        });
+      };
+
       Socket.prototype.flushSendBuffer = function() {
         var callback, _i, _len, _ref;
         if (this.isConnected() && this.sendBuffer.length > 0) {
@@ -312,6 +389,115 @@
       return Socket;
 
     })();
+    exports.LongPoller = (function() {
+      LongPoller.prototype.retryInMs = 5000;
+
+      LongPoller.prototype.endPoint = null;
+
+      LongPoller.prototype.skipHeartbeat = true;
+
+      LongPoller.prototype.onopen = function() {};
+
+      LongPoller.prototype.onerror = function() {};
+
+      LongPoller.prototype.onmessage = function() {};
+
+      LongPoller.prototype.onclose = function() {};
+
+      function LongPoller(endPoint) {
+        this.states = exports.Socket.states;
+        this.endPoint = this.normalizeEndpoint(endPoint);
+        this.readyState = this.states.connecting;
+        this.open();
+      }
+
+      LongPoller.prototype.open = function() {
+        return exports.Ajax.request("POST", this.endPoint, "application/json", null, (function(_this) {
+          return function(status, resp) {
+            if (status === 200) {
+              _this.readyState = _this.states.open;
+              _this.onopen();
+              return _this.poll();
+            } else {
+              return _this.onerror();
+            }
+          };
+        })(this));
+      };
+
+      LongPoller.prototype.normalizeEndpoint = function(endPoint) {
+        var suffix;
+        suffix = /\/$/.test(endPoint) ? "poll" : "/poll";
+        return endPoint.replace("ws://", "http://").replace("wss://", "https://") + suffix;
+      };
+
+      LongPoller.prototype.poll = function() {
+        if (this.readyState !== this.states.open) {
+          return;
+        }
+        console.log("polling");
+        return exports.Ajax.request("GET", this.endPoint, "application/json", null, (function(_this) {
+          return function(status, resp) {
+            var msg, _i, _len, _ref;
+            switch (status) {
+              case 200:
+                _ref = JSON.parse(resp);
+                for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+                  msg = _ref[_i];
+                  _this.onmessage({
+                    data: JSON.stringify(msg)
+                  });
+                }
+                return _this.poll();
+              case 204:
+                return _this.poll();
+              default:
+                _this.close();
+                return setTimeout((function() {
+                  return _this.open();
+                }), _this.retryInMs);
+            }
+          };
+        })(this));
+      };
+
+      LongPoller.prototype.send = function(body) {
+        return exports.Ajax.request("PUT", this.endPoint, "application/json", body, (function(_this) {
+          return function(status, resp) {
+            if (status !== 200) {
+              return _this.onerror();
+            }
+          };
+        })(this));
+      };
+
+      LongPoller.prototype.close = function(code, reason) {
+        this.readyState = this.states.closed;
+        return this.onclose();
+      };
+
+      return LongPoller;
+
+    })();
+    exports.Ajax = {
+      states: {
+        complete: 4
+      },
+      request: function(method, endPoint, accept, body, callback) {
+        var req;
+        req = root.XMLHttpRequest != null ? new root.XMLHttpRequest() : new root.ActiveXObject("Microsoft.XMLHTTP");
+        req.open(method, endPoint, true);
+        req.setRequestHeader("Content-type", accept);
+        req.onreadystatechange = (function(_this) {
+          return function() {
+            if (req.readyState === _this.states.complete) {
+              return typeof callback === "function" ? callback(req.status, req.responseText) : void 0;
+            }
+          };
+        })(this);
+        return req.send(body);
+      }
+    };
     return exports;
   });
 

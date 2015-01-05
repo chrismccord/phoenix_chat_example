@@ -2,6 +2,6 @@ defmodule ChatTest do
   use ExUnit.Case
 
   test "the truth" do
-    assert(true)
+    assert 1 + 1 == 2
   end
 end

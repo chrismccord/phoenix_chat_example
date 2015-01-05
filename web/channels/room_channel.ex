@@ -27,4 +27,3 @@ defmodule Chat.RoomChannel do
     socket
   end
 end
-

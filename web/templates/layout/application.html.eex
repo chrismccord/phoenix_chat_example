@@ -11,8 +11,8 @@
     <title>Phoenix Chat Example</title>
 
     <!-- Bootstrap core CSS -->
-    <link href="/css/bootstrap.css" rel="stylesheet">
-    <link href="/css/bootstrap-theme.css" rel="stylesheet">
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/bootstrap-theme.min.css" rel="stylesheet">
 
     <!-- Custom styles for this template -->
     <link href="/css/app.css" rel="stylesheet">
@@ -46,4 +46,3 @@
 
   </body>
 </html>
-
