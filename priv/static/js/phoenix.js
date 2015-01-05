@@ -95,22 +95,6 @@
         closed: 3
       };
 
-      Socket.prototype.conn = null;
-
-      Socket.prototype.endPoint = null;
-
-      Socket.prototype.channels = null;
-
-      Socket.prototype.sendBuffer = null;
-
-      Socket.prototype.sendBufferTimer = null;
-
-      Socket.prototype.flushEveryMs = 50;
-
-      Socket.prototype.reconnectTimer = null;
-
-      Socket.prototype.reconnectAfterMs = 5000;
-
       Socket.prototype.heartbeatIntervalMs = 30000;
 
       Socket.prototype.stateChangeCallbacks = null;
