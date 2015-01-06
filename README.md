@@ -4,7 +4,7 @@
 To start your new Phoenix application you have to:
 
 1. Install dependencies with `mix deps.get`
-2. Start Phoenix router with `mix phoenix.start`
+2. Start Phoenix router with `mix phoenix.server`
 
 Now you can visit `localhost:4000` from your browser.
 
@@ -65,13 +65,13 @@ defmodule Chat.Router do
   plug Plug.Static, at: "/static", from: :chat
   get "/", Chat.Controllers.Pages, :index, as: :page
 
-  channel "rooms", Chat.Channels.Rooms
+  channel "rooms", Chat.RoomChannel
 end
 ```
 
 #### Channel
 ```elixir
-defmodule Chat.Channels.Rooms do
+defmodule Chat.RoomChannel do
   use Phoenix.Channel
 
   def join(socket, topic, %{"username" => username}) do
@@ -81,7 +81,7 @@ defmodule Chat.Channels.Rooms do
     {:ok, socket}
   end
 
-  def event("new:message", socket, message) do
+  def event(socket, "new:message", message) do
     broadcast socket, "new:message", message
     socket
   end
