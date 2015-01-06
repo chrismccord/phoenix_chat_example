@@ -22,6 +22,11 @@ defmodule Chat.RoomChannel do
     {:error, socket, :unauthorized}
   end
 
+  @doc """
+  Event hook that fires upon receiving a message on the channel.
+
+  Must return the given socket.
+  """
   def event(socket, "new:msg", message) do
     broadcast socket, "new:msg", message
     socket

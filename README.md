@@ -25,7 +25,7 @@ $(function(){
   var sanitize   = function(html){ return $("<div/>").text(html).html(); }
 
   var messageTemplate = function(message){
-    var username = sanitize(message.username || "anonymous");
+    var username = sanitize(message.user || "anonymous");
     var body     = sanitize(message.body);
     return("<p><a href='#'>[" + username + "]</a>&nbsp; " + body +"</p>");
   }
@@ -34,7 +34,7 @@ $(function(){
 
     $input.off("keypress").on("keypress", function(e) {
       if (e.keyCode == 13) {
-        chan.send("new:message", {username: $username.val(), body: $input.val()});
+        chan.send("new:msg", {user: $username.val(), body: $input.val()});
         $input.val("");
       }
     });
@@ -43,13 +43,13 @@ $(function(){
       $status.text("joined");
     });
 
-    chan.on("new:message", function(message){
+    chan.on("new:msg", function(message){
       $messages.append(messageTemplate(message));
       scrollTo(0, document.body.scrollHeight);
     });
 
     chan.on("user:entered", function(msg){
-      var username = sanitize(msg.username || "anonymous");
+      var username = sanitize(msg.user || "anonymous");
       $messages.append("<br/><i>[" + username + " entered]</i>");
     });
   });
@@ -62,8 +62,20 @@ defmodule Chat.Router do
   use Phoenix.Router
   use Phoenix.Router.Socket, mount: "/ws"
 
-  plug Plug.Static, at: "/static", from: :chat
-  get "/", Chat.Controllers.Pages, :index, as: :page
+  pipeline :browser do
+    plug :accepts, ~w(html)
+    plug :fetch_session
+  end
+
+  pipeline :api do
+    plug :accepts, ~w(json)
+  end
+
+  scope "/", Chat do
+    pipe_through :browser
+
+    get "/", PageController, :index
+  end
 
   channel "rooms", Chat.RoomChannel
 end
