@@ -4,14 +4,17 @@ html {
   position: relative;
   min-height: 100%;
 }
+
 body {
   /* Margin bottom by footer height */
   margin-bottom: 60px;
 }
+
 body, html {
   overflow: hidden;
   height: 100%;
 }
+
 #footer {
   position: fixed;
   bottom: 0px;
@@ -30,6 +33,7 @@ body, html {
 body > .container {
   padding: 60px 15px 0;
 }
+
 .container .text-muted {
   margin: 20px 0;
 }
@@ -41,4 +45,9 @@ body > .container {
 
 code {
   font-size: 80%;
+}
+
+#messages {
+  overflow-y: scroll;
+  height: 0;
 }
