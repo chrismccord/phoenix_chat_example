@@ -33,7 +33,7 @@ $(function(){
 
     chan.on("new:msg", function(message){
       $messages.append(messageTemplate(message));
-      if(document.body.scrollHeight - document.body.scrollTop > $window.height() && !$messages.is(':animated')){
+      if(document.body.scrollHeight - document.body.scrollTop > $window.height() && !$body.is(':animated')){
         $body.animate({scrollTop: document.body.scrollHeight}, 'fast');
       }
     });
