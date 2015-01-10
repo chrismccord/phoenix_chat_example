@@ -1,5 +1,6 @@
 defmodule Chat.RoomChannel do
   use Phoenix.Channel
+  require Logger
 
   @doc """
   Authorize socket to subscribe and broadcast events on this channel & topic
@@ -11,19 +12,19 @@ defmodule Chat.RoomChannel do
   {:error, socket, reason} to deny subscription/broadcast on this channel
   for the requested topic
   """
-  def join(socket, "lobby", message) do
-    IO.puts "JOIN #{socket.channel}:#{socket.topic}"
+  def join("rooms:lobby", message, socket) do
+    Logger.debug "JOIN #{socket.topic}"
     reply socket, "join", %{status: "connected"}
     broadcast socket, "user:entered", %{user: message["user"]}
     {:ok, socket}
   end
 
-  def join(socket, _private_topic, _message) do
+  def join("rooms:" <> _private_subtopic, _message, socket) do
     {:error, socket, :unauthorized}
   end
 
-  def event(socket, "new:msg", message) do
+  def handle_in("new:msg", message, socket) do
     broadcast socket, "new:msg", message
-    socket
+    {:ok, socket}
   end
 end

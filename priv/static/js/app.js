@@ -1,5 +1,5 @@
 $(function(){
-  var socket     = new Phoenix.Socket("ws://" + location.host +  "/ws");
+    var socket     = new Phoenix.Socket("ws://" + location.host +  "/ws", {transport: Phoenix.LongPoller});
   var $status    = $("#status");
   var $messages  = $("#messages");
   var $input     = $("#message-input");
@@ -12,7 +12,7 @@ $(function(){
     return("<p><a href='#'>[" + username + "]</a>&nbsp; " + body +"</p>");
   }
 
-  socket.join("rooms", "lobby", {}, function(chan){
+  socket.join("rooms:lobby", {}, function(chan){
 
     $input.off("keypress").on("keypress", function(e) {
       if (e.keyCode == 13) {
@@ -36,4 +36,3 @@ $(function(){
     });
   });
 });
-
