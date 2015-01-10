@@ -5,11 +5,17 @@ $(function(){
   var $input     = $("#message-input");
   var $username  = $("#username");
   var sanitize   = function(html){ return $("<div/>").text(html).html(); }
+  var $body      = $('body');
+  var $window    = $(window);
 
   var messageTemplate = function(message){
     var username = sanitize(message.user || "anonymous");
     var body     = sanitize(message.body);
-    return("<p><a href='#'>[" + username + "]</a>&nbsp; " + body +"</p>");
+    return("<div class='row'>" +
+             "<div class='col-xs-12'>" +
+                "<a href='#'>[" + username + "]</a>&nbsp; " + body +
+              "</div>" +
+            "</div>");
   }
 
   socket.join("rooms", "lobby", {}, function(chan){
@@ -27,7 +33,9 @@ $(function(){
 
     chan.on("new:msg", function(message){
       $messages.append(messageTemplate(message));
-      scrollTo(0, document.body.scrollHeight);
+      if(document.body.scrollHeight - document.body.scrollTop > $window.height() && !$messages.is(':animated')){
+        $body.animate({scrollTop: document.body.scrollHeight}, 'fast');
+      }
     });
 
     chan.on("user:entered", function(msg){
@@ -36,4 +44,3 @@ $(function(){
     });
   });
 });
-
