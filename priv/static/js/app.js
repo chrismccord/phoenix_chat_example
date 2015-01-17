@@ -1,5 +1,5 @@
 $(function(){
-    var socket     = new Phoenix.Socket("ws://" + location.host +  "/ws", {transport: Phoenix.LongPoller});
+    var socket     = new Phoenix.Socket("ws://" + location.host +  "/ws");
   var $status    = $("#status");
   var $messages  = $("#messages");
   var $input     = $("#message-input");

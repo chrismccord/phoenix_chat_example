@@ -23,8 +23,18 @@ defmodule Chat.RoomChannel do
     {:error, socket, :unauthorized}
   end
 
+  def leave(reason, socket) do
+    Logger.error inspect(reason)
+    {:ok, socket}
+  end
+
   def handle_in("new:msg", message, socket) do
     broadcast socket, "new:msg", message
+    {:ok, socket}
+  end
+
+  def handle_out(event, message, socket) do
+    reply socket, event, message
     {:ok, socket}
   end
 end
