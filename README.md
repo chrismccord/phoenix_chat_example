@@ -17,7 +17,7 @@ http://phoenixchat.herokuapp.com
 #### JavaScript
 ```javascript
 $(function(){
-  var socket     = new Phoenix.Socket("ws://" + location.host +  "/ws");
+  var socket     = new Phoenix.Socket("/ws");
   var $status    = $("#status");
   var $messages  = $("#messages");
   var $input     = $("#message-input");
@@ -30,7 +30,7 @@ $(function(){
     return("<p><a href='#'>[" + username + "]</a>&nbsp; " + body +"</p>");
   }
 
-  socket.join("rooms", "lobby", {}, function(chan){
+  socket.join("rooms:lobby", {}, function(chan){
 
     $input.off("keypress").on("keypress", function(e) {
       if (e.keyCode == 13) {
@@ -60,12 +60,25 @@ $(function(){
 ```elixir
 defmodule Chat.Router do
   use Phoenix.Router
-  use Phoenix.Router.Socket, mount: "/ws"
 
-  plug Plug.Static, at: "/static", from: :chat
-  get "/", Chat.Controllers.Pages, :index, as: :page
+  socket "/ws", Chat do
+    channel "rooms:*", RoomChannel
+  end
 
-  channel "rooms", Chat.RoomChannel
+  pipeline :browser do
+    plug :accepts, ~w(html)
+    plug :fetch_session
+  end
+
+  pipeline :api do
+    plug :accepts, ~w(json)
+  end
+
+  scope "/", Chat do
+    pipe_through :browser
+
+    get "/", PageController, :index
+  end
 end
 ```
 
@@ -73,17 +86,32 @@ end
 ```elixir
 defmodule Chat.RoomChannel do
   use Phoenix.Channel
+  require Logger
 
-  def join(socket, topic, %{"username" => username}) do
-    IO.puts "JOIN #{socket.channel}:#{topic}"
-    reply socket, "join", status: "connected"
-    broadcast socket, "user:entered", %{username: username}
+  def join("rooms:lobby", message, socket) do
+    Logger.debug "JOIN #{socket.topic}"
+    reply socket, "join", %{status: "connected"}
+    broadcast socket, "user:entered", %{user: message["user"]}
     {:ok, socket}
   end
 
-  def event(socket, "new:message", message) do
-    broadcast socket, "new:message", message
-    socket
+  def join("rooms:" <> _private_subtopic, _message, socket) do
+    {:error, socket, :unauthorized}
+  end
+
+  def leave(reason, socket) do
+    Logger.error inspect(reason)
+    {:ok, socket}
+  end
+
+  def handle_in("new:msg", message, socket) do
+    broadcast socket, "new:msg", message
+    {:ok, socket}
+  end
+
+  def handle_out(event, message, socket) do
+    reply socket, event, message
+    {:ok, socket}
   end
 end
 ```
