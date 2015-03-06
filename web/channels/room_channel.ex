@@ -20,7 +20,7 @@ defmodule Chat.RoomChannel do
   end
 
   def join("rooms:" <> _private_subtopic, _message, socket) do
-    {:error, socket, :unauthorized}
+    {:error, :unauthorized, socket}
   end
 
   def leave(reason, socket) do
@@ -29,7 +29,7 @@ defmodule Chat.RoomChannel do
   end
 
   def handle_in("new:msg", message, socket) do
-    broadcast socket, "new:msg", message
+    broadcast! socket, "new:msg", message
     {:ok, socket}
   end
 

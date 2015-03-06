@@ -14,7 +14,8 @@ use Mix.Config
 config :chat, Chat.Endpoint,
   url: [host: "example.com"],
   http: [port: System.get_env("PORT")],
-  secret_key_base: "OEWE8XrIwohsfVS4SL1AXDznTZ4vsSEikEDGiH+MBM/72u06YG0CVnvZ+wqWD91y"
+  secret_key_base: "OEWE8XrIwohsfVS4SL1AXDznTZ4vsSEikEDGiH+MBM/72u06YG0CVnvZ+wqWD91y",
+  pubsub: [adapter: Phoenix.PubSub.PG2]
 
 config :logger,
   level: :info
