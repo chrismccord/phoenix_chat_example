@@ -1,6 +1,8 @@
 %{"cowboy": {:hex, :cowboy, "1.0.0"},
   "cowlib": {:hex, :cowlib, "1.0.1"},
+  "eredis": {:git, "git://github.com/wooga/eredis.git", "f6900e2a828430badac173250e00d540c5c5a02f", []},
   "phoenix": {:hex, :phoenix, "0.9.0"},
   "plug": {:hex, :plug, "0.10.0"},
   "poison": {:hex, :poison, "1.3.1"},
+  "poolboy": {:hex, :poolboy, "1.4.2"},
   "ranch": {:hex, :ranch, "1.0.0"}}
