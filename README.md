@@ -91,12 +91,12 @@ defmodule Chat.RoomChannel do
   def join("rooms:lobby", message, socket) do
     Logger.debug "JOIN #{socket.topic}"
     reply socket, "join", %{status: "connected"}
-    broadcast socket, "user:entered", %{user: message["user"]}
+    broadcast! socket, "user:entered", %{user: message["user"]}
     {:ok, socket}
   end
 
   def join("rooms:" <> _private_subtopic, _message, socket) do
-    {:error, socket, :unauthorized}
+    {:error, :unauthorized, socket}
   end
 
   def leave(reason, socket) do

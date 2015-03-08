@@ -15,14 +15,16 @@ defmodule Chat.Mixfile do
   # Type `mix help compile.app` for more information
   def application do
     [mod: {Chat, []},
-     applications: [:phoenix, :cowboy, :logger]]
+     applications: [:phoenix, :cowboy, :logger, :poolboy]]
   end
 
   # Specifies your project dependencies
   #
   # Type `mix help deps` for examples and options
   defp deps do
-    [{:phoenix, "~> 0.8.0"},
-     {:cowboy, "~> 1.0"}]
+    [{:phoenix, "~> 0.9.0"},
+     {:cowboy, "~> 1.0"},
+     {:eredis, github: "wooga/eredis"},
+     {:poolboy, "~> 1.4.2"}]
   end
 end
