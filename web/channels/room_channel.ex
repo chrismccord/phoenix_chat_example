@@ -15,7 +15,7 @@ defmodule Chat.RoomChannel do
   def join("rooms:lobby", message, socket) do
     Logger.debug "JOIN #{socket.topic}"
     reply socket, "join", %{status: "connected"}
-    broadcast socket, "user:entered", %{user: message["user"]}
+    broadcast! socket, "user:entered", %{user: message["user"]}
     {:ok, socket}
   end
 
@@ -29,7 +29,7 @@ defmodule Chat.RoomChannel do
   end
 
   def handle_in("new:msg", message, socket) do
-    broadcast socket, "new:msg", message
+    broadcast! socket, "new:msg", message
     {:ok, socket}
   end
 

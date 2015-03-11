@@ -1,3 +1,3 @@
 defmodule Chat.LayoutView do
-  use Chat.View
+  use Chat.Web, :view
 end

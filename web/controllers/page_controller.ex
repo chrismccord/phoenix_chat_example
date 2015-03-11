@@ -1,5 +1,5 @@
 defmodule Chat.PageController do
-  use Phoenix.Controller
+  use Chat.Web, :controller
 
   plug :action
 

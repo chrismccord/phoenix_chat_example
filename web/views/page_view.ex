@@ -1,4 +1,3 @@
 defmodule Chat.PageView do
-  use Chat.View
-
+  use Chat.Web, :view
 end

@@ -8,16 +8,16 @@ use Mix.Config
 # Configures the endpoint
 config :chat, Chat.Endpoint,
   url: [host: "localhost"],
-  http: [port: System.get_env("PORT")],
-  secret_key_base: "OEWE8XrIwohsfVS4SL1AXDznTZ4vsSEikEDGiH+MBM/72u06YG0CVnvZ+wqWD91y",
-  debug_errors: false
+  root: Path.expand("..", __DIR__),
+  secret_key_base: "/RjKJmMO6raXPRTq63qTqid1x6lVKTOP+FTxZHfX6Ogd+1xYmH6eZZFhBu1CIwtg",
+  debug_errors: false,
+  pubsub: [name: Chat.PubSub,
+           adapter: Phoenix.PubSub.PG2]
 
 # Configures Elixir's Logger
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",
   metadata: [:request_id]
-
-
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
