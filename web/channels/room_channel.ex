@@ -24,7 +24,7 @@ defmodule Chat.RoomChannel do
   end
 
   def leave(reason, socket) do
-    Logger.error inspect(reason)
+    Logger.debug "LEAVE #{socket.topic}"
     {:ok, socket}
   end
 
