@@ -8,7 +8,11 @@ defmodule Chat.Endpoint do
 
   # Code reloading will only work if the :code_reloader key of
   # the :phoenix application is set to true in your config file.
-  plug Phoenix.CodeReloader
+  if code_reloading? do
+    plug Phoenix.CodeReloader
+    plug Phoenix.LiveReloader
+  end
+
 
   plug Plug.Logger
 

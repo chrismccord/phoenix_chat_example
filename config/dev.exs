@@ -10,6 +10,7 @@ config :chat, Chat.Endpoint,
   http: [port: 4000],
   debug_errors: true,
   cache_static_lookup: false,
+  code_reloader: true,
   watchers: [node: ["node_modules/brunch/bin/brunch", "watch"]]
 
 # Watch static and templates for browser reloading.
@@ -17,12 +18,13 @@ config :chat, Chat.Endpoint,
 # will use higher CPU in dev as the number of files
 # grow. Adjust as necessary.
 config :chat, Chat.Endpoint,
-  live_reload: [Path.expand("priv/static/js/app.js"),
-                Path.expand("priv/static/css/app.css"),
-                Path.expand("web/templates/**/*.eex")]
-
-# Enables code reloading for development
-config :phoenix, :code_reloader, true
+  live_reload: [
+    patterns: [
+      ~r{priv/static/.*(js|css|png|jpeg|jpg|gif)$},
+      ~r{web/views/.*(ex)$},
+      ~r{web/templates/.*(eex)$}
+    ]
+  ]
 
 # Do not include metadata nor timestamps in development logs
 config :logger, :console, format: "[$level] $message\n"

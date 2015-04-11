@@ -5,33 +5,39 @@ class App {
   static init(){
     // var socket  = new Socket("ws://" + location.host +  "/ws", {transport: Phoenix.LongPoller})
     var socket     = new Socket("ws://" + location.host +  "/ws")
+    socket.connect()
     var $status    = $("#status")
     var $messages  = $("#messages")
     var $input     = $("#message-input")
     var $username  = $("#username")
 
-    socket.join("rooms:lobby", {}, chan => {
-      $input.off("keypress").on("keypress", e => {
-        if (e.keyCode == 13) {
-          chan.send("new:msg", {user: $username.val(), body: $input.val()})
-          $input.val("")
-        }
-      })
+    socket.onClose( e => console.log("CLOSE", e))
 
-      chan.on("join", msg => {
-        $messages.append("<br/><i>[You are now connected]</i>")
-      })
+    socket.join("rooms:lobby", {})
+      .receive("ignore", () => console.log("auth error") )
+      .receive("ok", chan => {
 
-      chan.on("new:msg", msg => {
-        $messages.append(this.messageTemplate(msg))
-        scrollTo(0, document.body.scrollHeight)
-      })
+        chan.onError( e => console.log("something went wrong", e) )
+        chan.onClose( e => console.log("channel closed", e) )
 
-      chan.on("user:entered", msg => {
-        var username = this.sanitize(msg.user || "anonymous")
-        $messages.append(`<br/><i>[${username} entered]</i>`)
+        $input.off("keypress").on("keypress", e => {
+          if (e.keyCode == 13) {
+            chan.push("new:msg", {user: $username.val(), body: $input.val()})
+            $input.val("")
+          }
+        })
+
+        chan.on("new:msg", msg => {
+          $messages.append(this.messageTemplate(msg))
+          scrollTo(0, document.body.scrollHeight)
+        })
+
+        chan.on("user:entered", msg => {
+          var username = this.sanitize(msg.user || "anonymous")
+          $messages.append(`<br/><i>[${username} entered]</i>`)
+        })
       })
-    })
+      .after(10000, () => console.log("Connection interruption") )
   }
 
   static sanitize(html){ return $("<div/>").text(html).html() }
