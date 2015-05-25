@@ -21,7 +21,7 @@ defmodule Chat.RoomChannel do
   end
 
   def join("rooms:" <> _private_subtopic, _message, _socket) do
-    :ignore
+    {:error, %{reason: "unauthorized"}}
   end
 
   def handle_info({:after_join, msg}, socket) do
@@ -35,13 +35,13 @@ defmodule Chat.RoomChannel do
     {:noreply, socket}
   end
 
-  def terminate(reason, socket) do
+  def terminate(reason, _socket) do
     Logger.debug"> leave #{inspect reason}"
     :ok
   end
 
   def handle_in("new:msg", msg, socket) do
     broadcast! socket, "new:msg", %{user: msg["user"], body: msg["body"]}
-    {:reply, {:ok, msg["body"]}, assign(socket, :user, msg["user"])}
+    {:reply, {:ok, %{msg: msg["body"]}}, assign(socket, :user, msg["user"])}
   end
 end
