@@ -15,16 +15,18 @@ defmodule Chat.Mixfile do
   # Type `mix help compile.app` for more information
   def application do
     [mod: {Chat, []},
-     applications: [:phoenix, :cowboy, :logger]]
+     applications: [:phoenix, :phoenix_html, :cowboy, :logger]]
   end
 
   # Specifies your project dependencies
   #
   # Type `mix help deps` for examples and options
   defp deps do
-    [{:phoenix, "~> 0.11"},
-     {:phoenix_live_reload, "~> 0.3"},
-     {:phoenix_ecto, "~> 0.1"},
+    # [{:phoenix, "~> 0.14"},
+    [{:phoenix, git: "https://github.com/phoenixframework/phoenix.git", override: true},
+     {:phoenix_html, "~> 1.0"},
+     {:phoenix_live_reload, "~> 0.4"},
+     {:phoenix_ecto, "~> 0.4"},
      {:postgrex, ">= 0.0.0"},
      {:cowboy, "~> 1.0"}]
   end
