@@ -3,7 +3,9 @@ import {Socket} from "phoenix"
 class App {
 
   static init(){
-    var socket     = new Socket("/ws")
+    let socket = new Socket("/ws", {
+      logger: (kind, msg, data) => { console.log(`${kind}: ${msg}`, data) }
+    })
     socket.connect()
     var $status    = $("#status")
     var $messages  = $("#messages")

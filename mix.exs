@@ -22,9 +22,8 @@ defmodule Chat.Mixfile do
   #
   # Type `mix help deps` for examples and options
   defp deps do
-    # [{:phoenix, "~> 0.14"},
-    [{:phoenix, git: "https://github.com/phoenixframework/phoenix.git", override: true},
-     {:phoenix_html, "~> 1.0"},
+    [{:phoenix, "~> 0.14"},
+     {:phoenix_html, "~> 1.1"},
      {:phoenix_live_reload, "~> 0.4"},
      {:phoenix_ecto, "~> 0.4"},
      {:postgrex, ">= 0.0.0"},
