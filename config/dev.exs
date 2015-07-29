@@ -7,16 +7,13 @@ use Mix.Config
 # watchers to your application. For example, we use it
 # with brunch.io to recompile .js and .css sources.
 config :chat, Chat.Endpoint,
-  http: [port: 4000],
+  http: [port: System.get_env("PORT") || 4000],
   debug_errors: true,
   cache_static_lookup: false,
   code_reloader: true,
   watchers: [node: ["node_modules/brunch/bin/brunch", "watch"]]
 
 # Watch static and templates for browser reloading.
-# *Note*: Be careful with wildcards. Larger projects
-# will use higher CPU in dev as the number of files
-# grow. Adjust as necessary.
 config :chat, Chat.Endpoint,
   live_reload: [
     patterns: [

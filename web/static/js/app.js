@@ -1,17 +1,20 @@
-import {Socket} from "phoenix"
+import {Socket, LongPoller} from "phoenix"
 
 class App {
 
   static init(){
-    let socket = new Socket("/ws", {
-      logger: (kind, msg, data) => { console.log(`${kind}: ${msg}`, data) }
+    let socket = new Socket("/socket", {
+      logger: ((kind, msg, data) => { console.log(`${kind}: ${msg}`, data) })
     })
-    socket.connect()
+
+    socket.connect({user_id: "123"})
     var $status    = $("#status")
     var $messages  = $("#messages")
     var $input     = $("#message-input")
     var $username  = $("#username")
 
+    socket.onOpen( ev => console.log("OPEN", ev) )
+    socket.onError( ev => console.log("ERROR", ev) )
     socket.onClose( e => console.log("CLOSE", e))
 
     var chan = socket.chan("rooms:lobby", {})

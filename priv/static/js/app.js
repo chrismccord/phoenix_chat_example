@@ -202,14 +202,12 @@ var _classCallCheck = function (instance, Constructor) { if (!(instance instance
 // Connect to the server using the `Socket` class:
 //
 //     let socket = new Socket("/ws")
-//     socket.connect()
+//     socket.connect({userToken: "123"})
 //
 // The `Socket` constructor takes the mount point of the socket
 // as well as options that can be found in the Socket docs,
-// such as configuring the `LongPoller` transport, and heartbeat.
-// Socket params can also be passed as an option for default, but
-// overridable channel params to apply to all channels.
-//
+// such as configuring the `LongPoll` transport, and heartbeat.
+// Socket params can also be passed as an object literal to `connect`.
 //
 // ## Channels
 //
@@ -295,14 +293,18 @@ var CHAN_EVENTS = {
   reply: "phx_reply",
   leave: "phx_leave"
 };
+var TRANSPORTS = {
+  longpoll: "longpoll",
+  websocket: "websocket"
+};
 
 var Push = (function () {
 
   // Initializes the Push
   //
   // chan - The Channel
-  // event - The event, ie `"phx_join"`
-  // payload - The payload, ie `{user_id: 123}`
+  // event - The event, for example `"phx_join"`
+  // payload - The payload, for example `{user_id: 123}`
   //
 
   function Push(chan, event, payload) {
@@ -643,9 +645,8 @@ var Socket = exports.Socket = (function () {
   //                                               "wss://example.com"
   //                                               "/ws" (inherited host & protocol)
   // opts - Optional configuration
-  //   transport - The Websocket Transport, ie WebSocket, Phoenix.LongPoller.
-  //               Defaults to WebSocket with automatic LongPoller fallback.
-  //   params - The defaults for all channel params, ie `{user_id: userToken}`
+  //   transport - The Websocket Transport, for example WebSocket or Phoenix.LongPoll.
+  //               Defaults to WebSocket with automatic LongPoll fallback.
   //   heartbeatIntervalMs - The millisec interval to send a heartbeat message
   //   reconnectAfterMs - The optional function that returns the millsec
   //                      reconnect interval. Defaults to stepped backoff of:
@@ -674,7 +675,7 @@ var Socket = exports.Socket = (function () {
     this.channels = [];
     this.sendBuffer = [];
     this.ref = 0;
-    this.transport = opts.transport || window.WebSocket || LongPoller;
+    this.transport = opts.transport || window.WebSocket || LongPoll;
     this.heartbeatIntervalMs = opts.heartbeatIntervalMs || 30000;
     this.reconnectAfterMs = opts.reconnectAfterMs || function (tries) {
       return [1000, 5000, 10000][tries - 1] || 10000;
@@ -684,8 +685,8 @@ var Socket = exports.Socket = (function () {
     }, this.reconnectAfterMs);
     this.logger = opts.logger || function () {}; // noop
     this.longpollerTimeout = opts.longpollerTimeout || 20000;
-    this.endPoint = this.expandEndpoint(endPoint);
-    this.params = opts.params || {};
+    this.params = {};
+    this.endPoint = "" + endPoint + "/" + TRANSPORTS.websocket;
   }
 
   _prototypeProperties(Socket, null, {
@@ -696,16 +697,17 @@ var Socket = exports.Socket = (function () {
       writable: true,
       configurable: true
     },
-    expandEndpoint: {
-      value: function expandEndpoint(endPoint) {
-        if (endPoint.charAt(0) !== "/") {
-          return endPoint;
+    endPointURL: {
+      value: function endPointURL() {
+        var uri = Ajax.appendParams(this.endPoint, this.params);
+        if (uri.charAt(0) !== "/") {
+          return uri;
         }
-        if (endPoint.charAt(1) === "/") {
-          return "" + this.protocol() + ":" + endPoint;
+        if (uri.charAt(1) === "/") {
+          return "" + this.protocol() + ":" + uri;
         }
 
-        return "" + this.protocol() + "://" + location.host + "" + endPoint;
+        return "" + this.protocol() + "://" + location.host + "" + uri;
       },
       writable: true,
       configurable: true
@@ -727,11 +729,16 @@ var Socket = exports.Socket = (function () {
       configurable: true
     },
     connect: {
+
+      // params - The params to send when connecting, for example `{user_id: userToken}`
+
       value: function connect() {
         var _this = this;
 
+        var params = arguments[0] === undefined ? {} : arguments[0];
+        this.params = params;
         this.disconnect(function () {
-          _this.conn = new _this.transport(_this.endPoint);
+          _this.conn = new _this.transport(_this.endPointURL());
           _this.conn.timeout = _this.longpollerTimeout;
           _this.conn.onopen = function () {
             return _this.onConnOpen();
@@ -800,7 +807,7 @@ var Socket = exports.Socket = (function () {
       value: function onConnOpen() {
         var _this = this;
 
-        this.log("transport", "connected to " + this.endPoint, this.transport);
+        this.log("transport", "connected to " + this.endPointURL(), this.transport.prototype);
         this.flushSendBuffer();
         this.reconnectTimer.reset();
         if (!this.conn.skipHeartbeat) {
@@ -885,15 +892,7 @@ var Socket = exports.Socket = (function () {
       value: function chan(topic) {
         var chanParams = arguments[1] === undefined ? {} : arguments[1];
 
-        var mergedParams = {};
-        for (var key in this.params) {
-          mergedParams[key] = this.params[key];
-        }
-        for (var key in chanParams) {
-          mergedParams[key] = chanParams[key];
-        }
-
-        var chan = new Channel(topic, mergedParams, this);
+        var chan = new Channel(topic, chanParams, this);
         this.channels.push(chan);
         return chan;
       },
@@ -984,9 +983,9 @@ var Socket = exports.Socket = (function () {
   return Socket;
 })();
 
-var LongPoller = exports.LongPoller = (function () {
-  function LongPoller(endPoint) {
-    _classCallCheck(this, LongPoller);
+var LongPoll = exports.LongPoll = (function () {
+  function LongPoll(endPoint) {
+    _classCallCheck(this, LongPoll);
 
     this.endPoint = null;
     this.token = null;
@@ -996,24 +995,27 @@ var LongPoller = exports.LongPoller = (function () {
     this.onerror = function () {}; // noop
     this.onmessage = function () {}; // noop
     this.onclose = function () {}; // noop
-    this.upgradeEndpoint = this.normalizeEndpoint(endPoint);
-    this.pollEndpoint = this.upgradeEndpoint + (/\/$/.test(endPoint) ? "poll" : "/poll");
+    this.pollEndpoint = this.normalizeEndpoint(endPoint);
     this.readyState = SOCKET_STATES.connecting;
 
     this.poll();
   }
 
-  _prototypeProperties(LongPoller, null, {
+  _prototypeProperties(LongPoll, null, {
     normalizeEndpoint: {
       value: function normalizeEndpoint(endPoint) {
-        return endPoint.replace("ws://", "http://").replace("wss://", "https://");
+        return endPoint.replace("ws://", "http://").replace("wss://", "https://").replace(new RegExp("(.*)/" + TRANSPORTS.websocket), "$1/" + TRANSPORTS.longpoll);
       },
       writable: true,
       configurable: true
     },
     endpointURL: {
       value: function endpointURL() {
-        return this.pollEndpoint + ("?token=" + encodeURIComponent(this.token) + "&sig=" + encodeURIComponent(this.sig) + "&format=json");
+        return Ajax.appendParams(this.pollEndpoint, {
+          token: this.token,
+          sig: this.sig,
+          format: "json"
+        });
       },
       writable: true,
       configurable: true
@@ -1107,7 +1109,7 @@ var LongPoller = exports.LongPoller = (function () {
     }
   });
 
-  return LongPoller;
+  return LongPoll;
 })();
 
 var Ajax = exports.Ajax = (function () {
@@ -1180,6 +1182,38 @@ var Ajax = exports.Ajax = (function () {
     parseJSON: {
       value: function parseJSON(resp) {
         return resp && resp !== "" ? JSON.parse(resp) : null;
+      },
+      writable: true,
+      configurable: true
+    },
+    serialize: {
+      value: function serialize(obj, parentKey) {
+        var queryStr = [];
+        for (var key in obj) {
+          if (!obj.hasOwnProperty(key)) {
+            continue;
+          }
+          var paramKey = parentKey ? "" + parentKey + "[" + key + "]" : key;
+          var paramVal = obj[key];
+          if (typeof paramVal === "object") {
+            queryStr.push(this.serialize(paramVal, paramKey));
+          } else {
+            queryStr.push(encodeURIComponent(paramKey) + "=" + encodeURIComponent(paramVal));
+          }
+        }
+        return queryStr.join("&");
+      },
+      writable: true,
+      configurable: true
+    },
+    appendParams: {
+      value: function appendParams(url, params) {
+        if (Object.keys(params).length === 0) {
+          return url;
+        }
+
+        var prefix = url.match(/\?/) ? "&" : "?";
+        return "" + url + "" + prefix + "" + this.serialize(params);
       },
       writable: true,
       configurable: true
@@ -1268,7 +1302,10 @@ var _createClass = (function () { function defineProperties(target, props) { for
 
 var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
 
-var Socket = require("phoenix").Socket;
+var _phoenix = require("phoenix");
+
+var Socket = _phoenix.Socket;
+var LongPoller = _phoenix.LongPoller;
 
 var App = (function () {
   function App() {
@@ -1280,17 +1317,24 @@ var App = (function () {
       value: function init() {
         var _this = this;
 
-        var socket = new Socket("/ws", {
+        var socket = new Socket("/socket", {
           logger: function (kind, msg, data) {
             console.log("" + kind + ": " + msg, data);
           }
         });
-        socket.connect();
+
+        socket.connect({ user_id: "123" });
         var $status = $("#status");
         var $messages = $("#messages");
         var $input = $("#message-input");
         var $username = $("#username");
 
+        socket.onOpen(function (ev) {
+          return console.log("OPEN", ev);
+        });
+        socket.onError(function (ev) {
+          return console.log("ERROR", ev);
+        });
         socket.onClose(function (e) {
           return console.log("CLOSE", e);
         });

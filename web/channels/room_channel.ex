@@ -25,7 +25,6 @@ defmodule Chat.RoomChannel do
   end
 
   def handle_info({:after_join, msg}, socket) do
-    Logger.debug "> join #{socket.topic}"
     broadcast! socket, "user:entered", %{user: msg["user"]}
     push socket, "join", %{status: "connected"}
     {:noreply, socket}
