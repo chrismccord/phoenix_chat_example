@@ -8,10 +8,7 @@ body {
   /* Margin bottom by footer height */
   margin-bottom: 60px;
 }
-body, html {
-  overflow: hidden;
-  height: 100%;
-}
+
 #footer {
   position: fixed;
   bottom: 0px;
@@ -23,14 +20,14 @@ body, html {
 }
 
 #messages {
-  margin-top: 80px;
+  margin-top: 0px;
 }
 /* Custom page CSS
 -------------------------------------------------- */
 /* Not required for template or sticky footer method. */
 
 body > .container {
-  padding: 60px 15px 0;
+  padding: 40px 15px 0;
 }
 .container .text-muted {
   margin: 20px 0;

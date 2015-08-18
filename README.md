@@ -18,21 +18,26 @@ http://phoenixchat.herokuapp.com
 
 #### JavaScript
 ```javascript
-import {Socket} from "phoenix"
+import {Socket, LongPoller} from "phoenix"
 
 class App {
 
   static init(){
-    var socket     = new Socket("/ws")
-    socket.connect()
+    let socket = new Socket("/socket", {
+      logger: ((kind, msg, data) => { console.log(`${kind}: ${msg}`, data) })
+    })
+
+    socket.connect({user_id: "123"})
     var $status    = $("#status")
     var $messages  = $("#messages")
     var $input     = $("#message-input")
     var $username  = $("#username")
 
+    socket.onOpen( ev => console.log("OPEN", ev) )
+    socket.onError( ev => console.log("ERROR", ev) )
     socket.onClose( e => console.log("CLOSE", e))
 
-    var chan = socket.chan("rooms:lobby", {})
+    var chan = socket.channel("rooms:lobby", {})
     chan.join().receive("ignore", () => console.log("auth error"))
                .receive("ok", () => console.log("join ok"))
                .after(10000, () => console.log("Connection interruption"))
@@ -73,27 +78,28 @@ $( () => App.init() )
 export default App
  ```
 
-#### Router
+#### Endpoint
 ```elixir
-defmodule Chat.Router do
-  use Phoenix.Router
+# lib/chat/endpoint.ex
+defmodule Chat.Endpoint do
+  use Phoenix.Endpoint
 
-  socket "/ws", Chat do
-    channel "rooms:*", RoomChannel
-  end
+  socket "/socket", Chat.UserSocket
+  ...
+end
+```
 
-  pipeline :browser do
-    plug :accepts, ["html"]
-    plug :fetch_session
-    plug :fetch_flash
-    plug :protect_from_forgery
-  end
+#### Socket
+```elixir
+# web/channels/user_socket.ex
+defmodule Chat.UserSocket do
+  use Phoenix.Socket
 
-  scope "/", Chat do
-    pipe_through :browser # Use the default browser stack
+  channel "rooms:*", Chat.RoomChannel
 
-    get "/", PageController, :index
-  end
+  transport :websocket, Phoenix.Transports.WebSocket
+  transport :longpoll, Phoenix.Transports.LongPoll
+  ...
 end
 ```
 
@@ -110,12 +116,12 @@ defmodule Chat.RoomChannel do
 
     {:ok, socket}
   end
+
   def join("rooms:" <> _private_subtopic, _message, _socket) do
-    :ignore
+    {:error, %{reason: "unauthorized"}}
   end
 
   def handle_info({:after_join, msg}, socket) do
-    Logger.debug "> join #{socket.topic}"
     broadcast! socket, "user:entered", %{user: msg["user"]}
     push socket, "join", %{status: "connected"}
     {:noreply, socket}
@@ -125,14 +131,14 @@ defmodule Chat.RoomChannel do
     {:noreply, socket}
   end
 
-  def terminate(reason, socket) do
+  def terminate(reason, _socket) do
     Logger.debug"> leave #{inspect reason}"
     :ok
   end
 
   def handle_in("new:msg", msg, socket) do
     broadcast! socket, "new:msg", %{user: msg["user"], body: msg["body"]}
-    {:reply, {:ok, msg["body"]}, assign(socket, :user, msg["user"])}
+    {:reply, {:ok, %{msg: msg["body"]}}, assign(socket, :user, msg["user"])}
   end
 end
 ```
