@@ -20,12 +20,7 @@ body {
   /* Margin bottom by footer height */
   margin-bottom: 60px; }
 
-/* line 11, stdin */
-body, html {
-  overflow: hidden;
-  height: 100%; }
-
-/* line 15, stdin */
+/* line 12, stdin */
 #footer {
   position: fixed;
   bottom: 0px;
@@ -35,27 +30,27 @@ body, html {
   padding-top: 1em;
   background-color: #f5f5f5; }
 
-/* line 25, stdin */
+/* line 22, stdin */
 #messages {
-  margin-top: 80px; }
+  margin-top: 0px; }
 
 /* Custom page CSS
 -------------------------------------------------- */
 /* Not required for template or sticky footer method. */
-/* line 32, stdin */
+/* line 29, stdin */
 body > .container {
-  padding: 60px 15px 0; }
+  padding: 40px 15px 0; }
 
-/* line 35, stdin */
+/* line 32, stdin */
 .container .text-muted {
   margin: 20px 0; }
 
-/* line 39, stdin */
+/* line 36, stdin */
 #footer > .container {
   padding-right: 15px;
   padding-left: 15px; }
 
-/* line 44, stdin */
+/* line 41, stdin */
 code {
   font-size: 80%; }
 
