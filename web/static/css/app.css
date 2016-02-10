@@ -6,6 +6,7 @@ html {
 }
 body {
   /* Margin bottom by footer height */
+  margin-top: 50px;
   margin-bottom: 60px;
 }
 
