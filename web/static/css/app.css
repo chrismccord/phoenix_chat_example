@@ -5,19 +5,26 @@ html {
   min-height: 100%;
 }
 body {
-  /* Margin bottom by footer height */
+  /* Margin bottom by footer height (small screens) */
   margin-top: 50px;
-  margin-bottom: 60px;
+  margin-bottom: 110px;
 }
 
 #footer {
   position: fixed;
   bottom: 0px;
   width: 100%;
-  /* Set the fixed height of the footer here */
-  height: 60px;
-  padding-top: 1em;
+  padding-top: 15px;
   background-color: #f5f5f5;
+
+  /* Set the fixed height of the footer here (small screens) */
+  height: 110px;
+}
+
+@media (min-width: 768px) {
+  /* Set the fixed height of the footer here (large screens) */
+  body { margin-bottom: 65px; }
+  #footer { height: 65px; }
 }
 
 #messages {
@@ -41,4 +48,10 @@ body > .container {
 
 code {
   font-size: 80%;
+}
+
+/* A column that has bottom margin when below the xs/sm breakpoint */
+.col-xs-stack { margin-bottom: 15px; }
+@media (min-width: 768px) {
+    .col-xs-stack { margin-bottom: 0px; }
 }
