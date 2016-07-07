@@ -7,22 +7,22 @@ defmodule Chat.RoomChannelTest do
     {:ok, socket: socket}
   end
 
-  test "join room other than lobby", %{socket: _socket} do
+  test "join subtopic other than lobby", %{socket: _socket} do
     ref = subscribe_and_join(socket(), RoomChannel, "rooms:other")
     assert {:error, %{reason: "unauthorized"}} = ref
   end
 
-  test "join lobby", %{socket: _socket} do
+  test "join rooms:lobby", %{socket: _socket} do
     assert_broadcast("user:entered", %{user: "Bob"})
     assert_push("join", %{status: "connected"})
   end
 
-  test "ping", %{socket: socket} do
+  test "ping channel", %{socket: socket} do
     send(socket.channel_pid, :ping)
     assert_push("new:msg", %{user: "SYSTEM", body: "ping"})
   end
 
-  test "recieve new:message", %{socket: socket} do
+  test "handle new:message", %{socket: socket} do
     ref = push(socket, "new:msg", %{"user" => "Bob", "body" => "Hello World"})
     socket = Phoenix.Channel.Server.socket(socket.channel_pid) #retrieve the updated socket
 
