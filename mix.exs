@@ -5,7 +5,7 @@ defmodule Chat.Mixfile do
     [app: :chat,
      version: "0.0.1",
      elixir: "~> 1.0",
-     elixirc_paths: ["lib", "web"],
+     elixirc_paths: elixirc_paths(Mix.env),
      compilers: [:phoenix] ++ Mix.compilers,
      deps: deps]
   end
@@ -17,6 +17,9 @@ defmodule Chat.Mixfile do
     [mod: {Chat, []},
      applications: [:phoenix, :phoenix_html, :cowboy, :logger]]
   end
+
+  defp elixirc_paths(:test), do: ["lib", "web", "test/support"]
+  defp elixirc_paths(_),     do: ["lib", "web"]
 
   # Specifies your project dependencies
   #
