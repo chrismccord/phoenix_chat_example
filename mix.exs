@@ -15,7 +15,7 @@ defmodule Chat.Mixfile do
   # Type `mix help compile.app` for more information
   def application do
     [mod: {Chat, []},
-     applications: [:phoenix, :phoenix_html, :cowboy, :logger]]
+     applications: [:phoenix, :phoenix_html, :cowboy, :postgrex, :logger]]
   end
 
   # Specifies your project dependencies
