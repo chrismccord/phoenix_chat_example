@@ -8,12 +8,3 @@ config :chat, Chat.Endpoint,
 
 # Print only warnings and errors during test
 config :logger, level: :warn
-
-# Configure your database
-config :chat, Chat.Repo,
-  adapter: Ecto.Adapters.Postgres,
-  username: "postgres",
-  password: "postgres",
-  database: "chat_test",
-  size: 1,
-  max_overflow: false
