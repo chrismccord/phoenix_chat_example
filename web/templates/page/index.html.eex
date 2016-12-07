@@ -3,7 +3,7 @@
 <div id="footer">
   <div class="container">
     <div class="row">
-      <div class="col-sm-2">
+      <div class="col-sm-2 col-xs-stack">
         <div class="input-group">
           <span class="input-group-addon">@</span>
           <input id="username" type="text" class="form-control" placeholder="username">
