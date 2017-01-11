@@ -17,6 +17,21 @@ class App {
     socket.onError( ev => console.log("ERROR", ev) )
     socket.onClose( e => console.log("CLOSE", e))
 
+    var subs = socket.channel("subscriptions", {})
+
+    subs.join().receive("ignore", () => console.log("auth error"))
+               .receive("ok", () => console.log("join ok"))
+               .after(10000, () => console.log("Connection interruption"))
+
+    subscription = {
+      query: "subscription Messages {\n  message {\n    body\n    author { name }\n  }\n}\n",
+      variables: {}
+    }
+
+    subs.on("")
+
+    subs.push("new", subscription)
+
     var chan = socket.channel("rooms:lobby", {})
     chan.join().receive("ignore", () => console.log("auth error"))
                .receive("ok", () => console.log("join ok"))
