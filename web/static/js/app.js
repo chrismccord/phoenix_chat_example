@@ -68,7 +68,7 @@ class App {
 
     chan.on("subscription:data", msg => {
       $messages.append(this.messageTemplate(msg.data))
-      // scrollTo(0, document.body.scrollHeight)
+      scrollTo(0, document.body.scrollHeight)
     })
 
     chan.on("user:entered", msg => {

@@ -2463,7 +2463,7 @@ var App = function () {
 
       chan.on("subscription:data", function (msg) {
         $messages.append(_this.messageTemplate(msg.data));
-        // scrollTo(0, document.body.scrollHeight)
+        scrollTo(0, document.body.scrollHeight);
       });
 
       chan.on("user:entered", function (msg) {
