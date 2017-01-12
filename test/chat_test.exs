@@ -11,7 +11,7 @@ defmodule ChatTest do
     payload = %{
       query: """
       subscription Messages {
-        message(article_id: 1) {
+        message(room: "lobby") {
           body
           author { name }
         }
@@ -29,16 +29,17 @@ defmodule ChatTest do
 
     mutation = """
     mutation CreateMessage {
-      message(body: "hello world") {
+      sendMessage(room: "lobby", body: "hello world") {
         __typename
       }
     }
     """
 
-    Absinthe.run(mutation, Chat.Schema)
+    assert {:ok, %{data: _}} = Absinthe.run(mutation, Chat.Schema)
 
     assert_broadcast("subscription:data", payload)
 
-    payload |> IO.inspect
+    assert payload == %{data: %{"message" => %{"author" => %{"name" => "Ben Wilson"},
+      "body" => "hello world"}}}
   end
 end
