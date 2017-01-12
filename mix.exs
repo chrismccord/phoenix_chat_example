@@ -25,10 +25,12 @@ defmodule Chat.Mixfile do
   #
   # Type `mix help deps` for examples and options
   defp deps do
-    [{:phoenix, path: "../phoenix", override: true},
-     {:phoenix_pubsub, path: "../phoenix_pubsub", override: true},
+    [{:phoenix, "1.2.1"},
+     {:poison, "3.0.0", override: true},
+     {:phoenix_pubsub, ">= 0.0.0"},
      {:phoenix_html, "~> 2.5"},
-     {:absinthe, path: "~/src/absinthe"},
+     {:absinthe, github: "absinthe-graphql/absinthe", branch: "subscriptions", override: true},
+     {:absinthe_plug, ">= 0.0.0"},
      {:phoenix_live_reload, "~> 1.0", only: :dev},
      {:postgrex, "~> 0.12.1"},
      {:cowboy, "~> 1.0"}]

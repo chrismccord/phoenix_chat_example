@@ -2,7 +2,7 @@ defmodule Chat.UserSocket do
   use Phoenix.Socket
 
   channel "rooms:*", Chat.RoomChannel
-  channel "subscriptions", Chat.SubscriptionChannel
+  channel "__absinthe__:*", Absinthe.Phoenix.Channel
 
   transport :websocket, Phoenix.Transports.WebSocket
   transport :longpoll, Phoenix.Transports.LongPoll
@@ -10,7 +10,7 @@ defmodule Chat.UserSocket do
   def connect(_params, socket) do
     opts = [
       context: %{},
-      # jump_phases: false,
+      jump_phases: false,
     ]
 
     socket =

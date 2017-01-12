@@ -7,7 +7,7 @@ use Mix.Config
 # watchers to your application. For example, we use it
 # with brunch.io to recompile .js and .css sources.
 config :chat, Chat.Endpoint,
-  http: [port: System.get_env("PORT") || 4000],
+  http: [port: 4000],
   debug_errors: true,
   cache_static_lookup: false,
   code_reloader: true,

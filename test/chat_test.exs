@@ -6,7 +6,7 @@ defmodule ChatTest do
 
   test "subscriptions" do
     {:ok, socket} = connect(Chat.UserSocket, %{})
-    {:ok, _, socket} = subscribe_and_join(socket, Chat.SubscriptionChannel, "subscriptions", %{})
+    {:ok, _, socket} = subscribe_and_join(socket, Absinthe.Phoenix.Channel, "__absinthe__:control", %{})
 
     payload = %{
       query: """
@@ -20,24 +20,22 @@ defmodule ChatTest do
       variables: %{}
     }
 
-    ref = push(socket, "new", payload)
-    assert_reply ref, :ok, %{ref: ref}
+    ref = push(socket, "doc", payload)
+    assert_reply ref, :ok, %{ref: "__absinthe__:" <> _}
 
-    @endpoint.subscribe(ref)
-
-    assert [_] = Absinthe.SubscriptionManager.subscriptions(Chat.Endpoint, :message)
+    assert [_] = Absinthe.SubscriptionManager.subscriptions(Chat.Endpoint, {:message, "lobby"})
 
     mutation = """
-    mutation CreateMessage {
-      sendMessage(room: "lobby", body: "hello world") {
+    mutation SendMessage($body: String!, $user: String!) {
+      sendMessage(room: "lobby", body: $body, user: $user) {
         __typename
       }
     }
     """
 
-    assert {:ok, %{data: _}} = Absinthe.run(mutation, Chat.Schema)
+    assert {:ok, %{data: _}} = Absinthe.run(mutation, Chat.Schema, variables: %{"body" => "hello world", "user" => "Ben Wilson"})
 
-    assert_broadcast("subscription:data", payload)
+    assert_push("subscription:data", payload)
 
     assert payload == %{data: %{"message" => %{"author" => %{"name" => "Ben Wilson"},
       "body" => "hello world"}}}
