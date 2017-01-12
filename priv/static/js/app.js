@@ -2419,30 +2419,50 @@ var App = function () {
         return console.log("CLOSE", e);
       });
 
-      var chan = socket.channel("rooms:lobby", {});
+      var chan = socket.channel("__absinthe__:control", {});
+
+      var subscription = {
+        query: "\n      subscription Messages {\n        message(room: \"lobby\") {\n          body\n          author { name }\n        }\n      }\n      ",
+        variables: {}
+      };
+
       chan.join().receive("ignore", function () {
         return console.log("auth error");
       }).receive("ok", function () {
-        return console.log("join ok");
+        console.log("join ok");
+
+        chan.push("doc", subscription).receive("ok", function (msg) {
+          return console.log("subscription created", msg);
+        }).receive("error", function (reasons) {
+          return console.log("subscription failed", reasons);
+        }).receive("timeout", function () {
+          return console.log("Networking issue...");
+        });
       }).after(10000, function () {
         return console.log("Connection interruption");
-      });
-      chan.onError(function (e) {
-        return console.log("something went wrong", e);
-      });
-      chan.onClose(function (e) {
-        return console.log("channel closed", e);
       });
 
       $input.off("keypress").on("keypress", function (e) {
         if (e.keyCode == 13) {
-          chan.push("new:msg", { user: $username.val(), body: $input.val() });
+          chan.push("doc", {
+            query: "\n          mutation SendMessage($body: String!, $user: String!) {\n            sendMessage(room: \"lobby\", body: $body, user: $user) {\n              __typename\n            }\n          }\n          ",
+            variables: {
+              body: $input.val(),
+              user: $username.val()
+            }
+          }).receive("ok", function (msg) {
+            return console.log("mutation succeeded", msg);
+          }).receive("error", function (reasons) {
+            return console.log("mutation failed", reasons);
+          }).receive("timeout", function () {
+            return console.log("Networking issue...");
+          });
           $input.val("");
         }
       });
 
-      chan.on("new:msg", function (msg) {
-        $messages.append(_this.messageTemplate(msg));
+      chan.on("subscription:data", function (msg) {
+        $messages.append(_this.messageTemplate(msg.data));
         scrollTo(0, document.body.scrollHeight);
       });
 
@@ -2458,9 +2478,10 @@ var App = function () {
     }
   }, {
     key: "messageTemplate",
-    value: function messageTemplate(msg) {
-      var username = this.sanitize(msg.user || "anonymous");
-      var body = this.sanitize(msg.body);
+    value: function messageTemplate(data) {
+      var message = data.message;
+      var username = this.sanitize(message.author.name || "anonymous");
+      var body = this.sanitize(message.body);
 
       return "<p><a href='#'>[" + username + "]</a>&nbsp; " + body + "</p>";
     }

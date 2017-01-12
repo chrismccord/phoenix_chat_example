@@ -3,7 +3,6 @@ defmodule Chat.Endpoint do
 
   socket "/socket", Chat.UserSocket
 
-
   # Serve at "/" the given assets from "priv/static" directory
   plug Plug.Static,
     at: "/", from: :chat,
@@ -16,7 +15,6 @@ defmodule Chat.Endpoint do
     plug Phoenix.CodeReloader
     plug Phoenix.LiveReloader
   end
-
 
   plug Plug.Logger
 
