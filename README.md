@@ -19,6 +19,7 @@ http://phoenixchat.herokuapp.com
 
 #### JavaScript
 ```javascript
+# web/static/js/app.js
 import {Socket, LongPoller} from "phoenix"
 
 class App {
@@ -106,6 +107,7 @@ end
 
 #### Channel
 ```elixir
+# web/channels/room_channel.ex
 defmodule Chat.RoomChannel do
   use Phoenix.Channel
   require Logger
