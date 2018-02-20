@@ -4,10 +4,10 @@ defmodule Chat.Mixfile do
   def project do
     [app: :chat,
      version: "0.0.1",
-     elixir: "~> 1.0",
+     elixir: "~> 1.6",
      elixirc_paths: ["lib", "web"],
      compilers: [:phoenix] ++ Mix.compilers,
-     deps: deps]
+     deps: deps()]
   end
 
   # Configuration for the OTP application
@@ -15,17 +15,17 @@ defmodule Chat.Mixfile do
   # Type `mix help compile.app` for more information
   def application do
     [mod: {Chat, []},
-     applications: [:phoenix, :phoenix_html, :cowboy, :logger, :postgrex]]
+     extra_applications: [:logger]]
   end
 
   # Specifies your project dependencies
   #
   # Type `mix help deps` for examples and options
   defp deps do
-    [{:phoenix, "~> 1.2"},
-     {:phoenix_html, "~> 2.5"},
-     {:phoenix_live_reload, "~> 1.0", only: :dev},
-     {:postgrex, "~> 0.12.1"},
-     {:cowboy, "~> 1.0"}]
+    [{:phoenix, "~> 1.3"},
+     {:phoenix_html, "~> 2.10"},
+     {:phoenix_live_reload, "~> 1.1", only: :dev},
+     {:postgrex, "~> 0.13"},
+     {:cowboy, "~> 1.1"}]
   end
 end
