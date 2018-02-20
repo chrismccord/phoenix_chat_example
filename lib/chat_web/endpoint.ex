@@ -1,7 +1,7 @@
-defmodule Chat.Endpoint do
+defmodule ChatWeb.Endpoint do
   use Phoenix.Endpoint, otp_app: :chat
 
-  socket "/socket", Chat.UserSocket
+  socket "/socket", ChatWeb.UserSocket
 
 
   # Serve at "/" the given assets from "priv/static" directory
@@ -16,7 +16,6 @@ defmodule Chat.Endpoint do
     plug Phoenix.CodeReloader
     plug Phoenix.LiveReloader
   end
-
 
   plug Plug.Logger
 
@@ -34,5 +33,5 @@ defmodule Chat.Endpoint do
     signing_salt: "LH6XmqGb",
     encryption_salt: "CIPZg4Qo"
 
-  plug Chat.Router
+  plug ChatWeb.Router
 end

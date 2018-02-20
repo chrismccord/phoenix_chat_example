@@ -82,7 +82,7 @@ export default App
 #### Endpoint
 ```elixir
 # lib/chat/endpoint.ex
-defmodule Chat.Endpoint do
+defmodule ChatWeb.Endpoint do
   use Phoenix.Endpoint
 
   socket "/socket", Chat.UserSocket
@@ -93,7 +93,7 @@ end
 #### Socket
 ```elixir
 # web/channels/user_socket.ex
-defmodule Chat.UserSocket do
+defmodule ChatWeb.UserSocket do
   use Phoenix.Socket
 
   channel "rooms:*", Chat.RoomChannel
@@ -106,7 +106,7 @@ end
 
 #### Channel
 ```elixir
-defmodule Chat.RoomChannel do
+defmodule ChatWeb.RoomChannel do
   use Phoenix.Channel
   require Logger
 

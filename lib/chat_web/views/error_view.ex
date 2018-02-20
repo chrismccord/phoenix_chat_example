@@ -1,5 +1,5 @@
-defmodule Chat.ErrorView do
-  use Chat.Web, :view
+defmodule ChatWeb.ErrorView do
+  use ChatWeb, :view
 
   def render("404.html", _assigns) do
     "Page not found - 404"

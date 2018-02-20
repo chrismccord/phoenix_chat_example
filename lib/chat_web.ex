@@ -1,12 +1,12 @@
-defmodule Chat.Web do
+defmodule ChatWeb do
   @moduledoc """
   A module that keeps using definitions for controllers,
   views and so on.
 
   This can be used in your application as:
 
-      use Chat.Web, :controller
-      use Chat.Web, :view
+      use ChatWeb, :controller
+      use ChatWeb, :view
 
   Keep the definitions in this module short and clean,
   mostly focused on imports, uses and aliases.
@@ -14,10 +14,12 @@ defmodule Chat.Web do
 
   def view do
     quote do
-      use Phoenix.View, root: "web/templates"
+      use Phoenix.View,
+        root: "lib/chat_web/templates",
+        namespace: ChatWeb
 
       # Import URL helpers from the router
-      import Chat.Router.Helpers
+      import ChatWeb.Router.Helpers
 
       # Import all HTML functions (forms, tags, etc)
       use Phoenix.HTML
@@ -26,10 +28,10 @@ defmodule Chat.Web do
 
   def controller do
     quote do
-      use Phoenix.Controller
+      use Phoenix.Controller, namespace: ChatWeb
 
       # Import URL helpers from the router
-      import Chat.Router.Helpers
+      import ChatWeb.Router.Helpers
     end
   end
 

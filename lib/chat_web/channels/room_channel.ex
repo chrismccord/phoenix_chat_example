@@ -1,4 +1,4 @@
-defmodule Chat.RoomChannel do
+defmodule ChatWeb.RoomChannel do
   use Phoenix.Channel
   require Logger
 
@@ -15,7 +15,7 @@ defmodule Chat.RoomChannel do
   def join("rooms:lobby", message, socket) do
     Process.flag(:trap_exit, true)
     :timer.send_interval(5000, :ping)
-    send(self, {:after_join, message})
+    send(self(), {:after_join, message})
 
     {:ok, socket}
   end
@@ -35,7 +35,7 @@ defmodule Chat.RoomChannel do
   end
 
   def terminate(reason, _socket) do
-    Logger.debug"> leave #{inspect reason}"
+    Logger.debug("> leave #{inspect reason}")
     :ok
   end
 

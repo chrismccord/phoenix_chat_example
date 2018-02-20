@@ -1,7 +1,8 @@
-defmodule Chat.UserSocket do
+defmodule ChatWeb.UserSocket do
   use Phoenix.Socket
+  require Logger
 
-  channel "rooms:*", Chat.RoomChannel
+  channel "rooms:*", ChatWeb.RoomChannel
 
   transport :websocket, Phoenix.Transports.WebSocket
   transport :longpoll, Phoenix.Transports.LongPoll

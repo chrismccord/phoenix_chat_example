@@ -1,4 +1,4 @@
-defmodule Chat.Router do
+defmodule ChatWeb.Router do
   use Phoenix.Router
 
   pipeline :browser do
@@ -12,7 +12,7 @@ defmodule Chat.Router do
     plug :accepts, ["json"]
   end
 
-  scope "/", Chat do
+  scope "/", ChatWeb do
     pipe_through :browser # Use the default browser stack
 
     get "/", PageController, :index
