@@ -3,11 +3,12 @@ import {Socket, LongPoller} from "phoenix"
 class App {
 
   static init(){
-    let socket = new Socket("/socket", {
-      logger: ((kind, msg, data) => { console.log(`${kind}: ${msg}`, data) })
-    })
+    let socket = new Socket("/socket", {params: {token: window.userToken}, 
+                                        logger: ((kind, msg, data) => {console.log('${kind}: ${msg}', data)})})
+    // let socket = new Socket("/socket", {
+    //   logger: ((kind, msg, data) => { console.log(`${kind}: ${msg}`, data) })
+    // })
 
-    socket.connect({user_id: "123"})
     var $status    = $("#status")
     var $messages  = $("#messages")
     var $input     = $("#message-input")
@@ -17,10 +18,24 @@ class App {
     socket.onError( ev => console.log("ERROR", ev) )
     socket.onClose( e => console.log("CLOSE", e))
 
+    // Finally, connect to the socket:
+    let channel           = socket.channel("room:lobby", {})
+    let chatInput         = document.querySelector("#message-input")
+    let messagesContainer = document.querySelector("#messages")
+    
+    socket.connect({user_id: "abcd"})
+    
+    chatInput.addEventListener("keypress", event => {
+      if(event.key === 'Enter'){
+        channel.push("new_msg", {body: chatInput.value})
+        chatInput.value = ""
+      }
+    })
+
     var chan = socket.channel("rooms:lobby", {})
-    chan.join().receive("ignore", () => console.log("auth error"))
-               .receive("ok", () => console.log("join ok"))
-               .after(10000, () => console.log("Connection interruption"))
+    chan.join().receive("ok", () => console.log("join ok"))
+               .receive("ignore", () => console.log("auth error"))
+               // .after(10000, () => console.log("Connection interruption"))
     chan.onError(e => console.log("something went wrong", e))
     chan.onClose(e => console.log("channel closed", e))
 
