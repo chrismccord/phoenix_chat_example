@@ -1612,9 +1612,6 @@ var App = function () {
         logger: function logger(kind, msg, data) {
           console.log('${kind}: ${msg}', data);
         } });
-      // let socket = new Socket("/socket", {
-      //   logger: ((kind, msg, data) => { console.log(`${kind}: ${msg}`, data) })
-      // })
 
       var $status = $("#status");
       var $messages = $("#messages");
@@ -1632,46 +1629,37 @@ var App = function () {
       });
 
       // Finally, connect to the socket:
-      var channel = socket.channel("room:lobby", {});
+      var channel = socket.channel("rooms:lobby", {});
       var chatInput = document.querySelector("#message-input");
       var messagesContainer = document.querySelector("#messages");
 
-      socket.connect({ user_id: "abcd" });
+      channel.join().receive("ok", function () {
+        return console.log("join yay!");
+      }).receive("ignore", function () {
+        return console.log("you stink, go away");
+      });
+      channel.onError(function (e) {
+        return console.log("something went wrong", e);
+      });
+      channel.onClose(function (e) {
+        return console.log("channel closed", e);
+      });
+
+      socket.connect();
 
       chatInput.addEventListener("keypress", function (event) {
         if (event.key === 'Enter') {
-          channel.push("new_msg", { body: chatInput.value });
+          channel.push("new:msg", { user: $username.val(), body: chatInput.value });
           chatInput.value = "";
         }
       });
 
-      var chan = socket.channel("rooms:lobby", {});
-      chan.join().receive("ok", function () {
-        return console.log("join ok");
-      }).receive("ignore", function () {
-        return console.log("auth error");
-      });
-      // .after(10000, () => console.log("Connection interruption"))
-      chan.onError(function (e) {
-        return console.log("something went wrong", e);
-      });
-      chan.onClose(function (e) {
-        return console.log("channel closed", e);
-      });
-
-      $input.off("keypress").on("keypress", function (e) {
-        if (e.keyCode == 13) {
-          chan.push("new:msg", { user: $username.val(), body: $input.val() });
-          $input.val("");
-        }
-      });
-
-      chan.on("new:msg", function (msg) {
+      channel.on("new:msg", function (msg) {
         $messages.append(_this.messageTemplate(msg));
         scrollTo(0, document.body.scrollHeight);
       });
 
-      chan.on("user:entered", function (msg) {
+      channel.on("user:entered", function (msg) {
         var username = _this.sanitize(msg.user || "anonymous");
         $messages.append("<br/><i>[" + username + " entered]</i>");
       });
