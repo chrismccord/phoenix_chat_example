@@ -1,5 +1,4 @@
-<div id="messages" class="container">
-</div>
+<div id="messages" class="container"/>
 <div id="footer">
   <div class="container">
     <div class="row">
