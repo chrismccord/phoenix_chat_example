@@ -1,7 +1,5 @@
 # Simple Chat Example
 
-## This probably worked about 5 years ago when originally created, but the biggest problem is how JS centric the whole app feels. Maybe I missed something, so I decided to try and spend a little bit of time and bring it in to being maybe a bit more Elixir/Phoenix focused and less JS focused...
-
 > I got here via [HexDocs](https://hexdocs.pm/phoenix/channels.html#content)
 
 > Built with the [Phoenix Framework](https://github.com/phoenixframework/phoenix)
@@ -147,3 +145,5 @@ defmodule Chat.RoomChannel do
   end
 end
 ```
+
+## This probably worked about 5 years ago when originally created, but the biggest problem is how JS centric the whole app feels. Maybe I missed something, so I decided to try and spend a little bit of time and bring it in to being maybe a bit more Elixir/Phoenix focused and less JS focused.
