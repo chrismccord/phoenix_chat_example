@@ -7,8 +7,9 @@ defmodule Chat do
     import Supervisor.Spec, warn: false
 
     children = [
+      {Phoenix.PubSub, [name: Chat.PubSub, adapter: Phoenix.PubSub.PG2]},
       # Start the endpoint when the application starts
-      supervisor(Chat.Endpoint, []),
+      supervisor(Chat.Endpoint, [])
       # Here you could define other workers and supervisors as children
       # worker(Chat.Worker, [arg1, arg2, arg3]),
     ]
