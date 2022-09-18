@@ -8,7 +8,7 @@
     <meta name="author" content="">
 
     <title>Hello Phoenix!</title>
-    <link rel="stylesheet" href="<%= static_path(@conn, "/css/app.css") %>">
+    <link rel="stylesheet" href={static_path(@conn, "/css/app.css")}>
   </head>
 
   <body>
@@ -35,10 +35,10 @@
 
     <!-- Begin page content -->
       <main role="main">
-        <%= render @view_module, @view_template, assigns %>
+        <%= @inner_content %>
       </main>
 
 
-    <script src="<%= static_path(@conn, "/js/app.js") %>"></script>
+    <script src={static_path(@conn, "/js/app.js")}></script>
   </body>
 </html>
